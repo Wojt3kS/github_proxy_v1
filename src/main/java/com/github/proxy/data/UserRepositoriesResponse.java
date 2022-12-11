@@ -3,6 +3,7 @@ package com.github.proxy.data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRepositoriesResponse {
@@ -65,5 +66,21 @@ public class UserRepositoriesResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserRepositoriesResponse)) return false;
+        UserRepositoriesResponse that = (UserRepositoriesResponse) o;
+        return Objects.equals(getOwnerLogin(), that.getOwnerLogin()) &&
+                (Objects.equals(getRepos(), that.getRepos()) ||
+                        (getRepos().size() == that.getRepos().size() && getRepos().containsAll(that.getRepos()) && that.getRepos().containsAll(getRepos())))
+                && Objects.equals(getStatus(), that.getStatus()) && Objects.equals(getMessage(), that.getMessage());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getOwnerLogin(), getRepos(), getStatus(), getMessage());
     }
 }
