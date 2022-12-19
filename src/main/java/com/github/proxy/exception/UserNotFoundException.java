@@ -1,6 +1,6 @@
-package com.github.proxy.request.exception;
+package com.github.proxy.exception;
 
-public class UserNotFoundException extends Exception {
+public class UserNotFoundException extends RuntimeException {
 
     private int responseCode;
 

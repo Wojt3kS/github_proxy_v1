@@ -4,18 +4,20 @@ import com.github.proxy.data.Branch;
 import com.github.proxy.data.Repository;
 import com.github.proxy.data.UserRepositoriesResponse;
 import com.github.proxy.request.GitHubClient;
-import com.github.proxy.request.exception.UserNotFoundException;
+import com.github.proxy.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class GitHubServiceTest {
@@ -32,7 +34,7 @@ class GitHubServiceTest {
     }
 
     @Test
-    void getUserRepositoriesForExistingUser() throws IOException, UserNotFoundException {
+    void getUserRepositoriesForExistingUser() {
         String username = "Wojt3kS";
         List<String> repositoryNames = Arrays.asList("Algoritms", "github_proxy_v1", "MyTwitter");
         List<Repository> repositories = Arrays.asList(
@@ -48,11 +50,15 @@ class GitHubServiceTest {
 
         UserRepositoriesResponse result = service.getUserRepositories(username);
 
+        verify(client).sendGetGithubUserRequest(username);
+        verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(0));
+        verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(1));
+        verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(2));
         assertEquals(expectedResult, result);
     }
 
     @Test
-    void getUserRepositoriesForExistingUserWithPartialAnswer() throws IOException, UserNotFoundException {
+    void getUserRepositoriesForExistingUserWithPartialAnswer() {
         String username = "Wojt3kS";
         List<String> repositoryNames = Arrays.asList("Algoritms", "github_proxy_v1", "MyTwitter");
         List<Repository> repositories = Arrays.asList(
@@ -64,24 +70,29 @@ class GitHubServiceTest {
         when(client.sendGetGithubUserRequest(username)).thenReturn(repositoryNames);
         when(client.sendGetGithubBranchListRequest(username, repositoryNames.get(0))).thenReturn(repositories.get(0));
         when(client.sendGetGithubBranchListRequest(username, repositoryNames.get(1))).thenReturn(repositories.get(1));
-        when(client.sendGetGithubBranchListRequest(username, repositoryNames.get(2))).thenThrow(new IOException());
+        when(client.sendGetGithubBranchListRequest(username, repositoryNames.get(2))).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         UserRepositoriesResponse result = service.getUserRepositories(username);
 
+        verify(client).sendGetGithubUserRequest(username);
+        verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(0));
+        verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(1));
+        verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(2));
         assertEquals(expectedResult, result);
     }
 
     @Test
-    void getUserRepositoriesForNotExistingUser() throws IOException, UserNotFoundException {
+    void getUserRepositoriesForNotExistingUser() {
         String username = "ThisUserDoesNotExist921034854743";
         int expectedStatus = 404;
         String expectedMessage = "Not found";
-        UserRepositoriesResponse expectedResult = new UserRepositoriesResponse(expectedStatus, expectedMessage);
 
         when(client.sendGetGithubUserRequest(username)).thenThrow(new UserNotFoundException(expectedMessage, expectedStatus));
 
-        UserRepositoriesResponse result = service.getUserRepositories(username);
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> service.getUserRepositories(username));
 
-        assertEquals(expectedResult, result);
+        verify(client).sendGetGithubUserRequest(username);
+        assertEquals(expectedStatus, exception.getResponseCode());
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
