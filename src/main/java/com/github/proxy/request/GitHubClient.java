@@ -49,32 +49,4 @@ public class GitHubClient {
                 restTemplate.getForEntity(String.format(GITHUB_GET_BRANCH_LIST_URL, username, repositoryName), GitHubBranch[].class);
         return responseParser.parseGitHubBranchesToRepository(responseEntity, repositoryName);
     }
-
-//    public RestTemplate restTemplate() {
-//        org.apache.http.ssl.TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-//
-//        SSLContext sslContext = null;
-//        try {
-//            sslContext = org.apache.http.ssl.SSLContexts.custom()
-//                    .loadTrustMaterial(null, acceptingTrustStrategy)
-//                    .build();
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        } catch (KeyManagementException e) {
-//            e.printStackTrace();
-//        } catch (KeyStoreException e) {
-//            e.printStackTrace();
-//        }
-//
-//        SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-//        CloseableHttpClient httpClient = HttpClients.custom()
-//                .setSSLSocketFactory(csf)
-//                .build();
-//
-//        HttpComponentsClientHttpRequestFactory requestFactory =
-//                new HttpComponentsClientHttpRequestFactory();
-//
-//        requestFactory.setHttpClient(httpClient);
-//        return new RestTemplate(requestFactory);
-//    }
 }

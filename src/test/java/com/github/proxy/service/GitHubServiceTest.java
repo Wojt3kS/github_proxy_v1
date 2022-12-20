@@ -12,13 +12,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class GitHubServiceTest {
 
@@ -54,6 +52,7 @@ class GitHubServiceTest {
         verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(0));
         verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(1));
         verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(2));
+        verifyNoMoreInteractions(client);
         assertEquals(expectedResult, result);
     }
 
@@ -78,6 +77,7 @@ class GitHubServiceTest {
         verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(0));
         verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(1));
         verify(client).sendGetGithubBranchListRequest(username, repositoryNames.get(2));
+        verifyNoMoreInteractions(client);
         assertEquals(expectedResult, result);
     }
 
@@ -92,6 +92,7 @@ class GitHubServiceTest {
         UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> service.getUserRepositories(username));
 
         verify(client).sendGetGithubUserRequest(username);
+        verifyNoMoreInteractions(client);
         assertEquals(expectedStatus, exception.getResponseCode());
         assertEquals(expectedMessage, exception.getMessage());
     }

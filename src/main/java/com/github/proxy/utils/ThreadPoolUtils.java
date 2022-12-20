@@ -20,13 +20,11 @@ public class ThreadPoolUtils {
 
     public static boolean shutdownThreadPool(ThreadPoolExecutor threadPool) {
         threadPool.shutdown();
-        boolean allThreadsFinished;
         try {
-            allThreadsFinished = threadPool.awaitTermination(MAX_THREAD_WAIT_TIME, TimeUnit.SECONDS);
+            return threadPool.awaitTermination(MAX_THREAD_WAIT_TIME, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.error(e);
-            allThreadsFinished = false;
+            return false;
         }
-        return allThreadsFinished;
     }
 }

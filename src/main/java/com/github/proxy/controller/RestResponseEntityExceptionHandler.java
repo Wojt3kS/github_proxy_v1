@@ -5,6 +5,7 @@ import com.github.proxy.exception.OutOfGitHubRequestsException;
 import com.github.proxy.exception.UserNotFoundException;
 import com.github.proxy.exception.WrongAcceptHeaderParamException;
 import com.github.proxy.utils.RequestParamValidator;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,7 +27,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<UserRepositoriesResponse> handleWrongAcceptHeaderParam(WrongAcceptHeaderParamException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
                 .body(new UserRepositoriesResponse(HttpStatus.NOT_ACCEPTABLE.value(),
-                        String.format(RequestParamValidator.WRONG_ACCEPT_PARAM_MESSAGE, request.getHeader(RequestParamValidator.ACCEPT_HEADER_PARAM))));
+                        String.format(RequestParamValidator.WRONG_ACCEPT_PARAM_MESSAGE, request.getHeader(HttpHeaders.ACCEPT))));
     }
 
     @ExceptionHandler(value = {OutOfGitHubRequestsException.class})

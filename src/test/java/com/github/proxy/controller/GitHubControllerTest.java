@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -19,11 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class GitHubControllerTest {
-
 
     @Mock
     private GitHubService service;
@@ -50,13 +49,15 @@ class GitHubControllerTest {
         UserRepositoriesResponse expectedRepositories = new UserRepositoriesResponse(username, repositories, HttpStatus.OK.value());
         ResponseEntity<UserRepositoriesResponse> expectedResult = ResponseEntity.status(HttpStatus.OK).body(expectedRepositories);
 
-        when(request.getHeader("Accept")).thenReturn(acceptHeaderParam);
+        when(request.getHeader(HttpHeaders.ACCEPT)).thenReturn(acceptHeaderParam);
         when(service.getUserRepositories(username)).thenReturn(expectedRepositories);
 
         ResponseEntity<UserRepositoriesResponse> result = controller.getUserRepositories(username, request);
 
-        verify(request).getHeader("Accept");
+        verify(request).getHeader(HttpHeaders.ACCEPT);
+        verifyNoMoreInteractions(request);
         verify(service).getUserRepositories(username);
+        verifyNoMoreInteractions(service);
         assertEquals(expectedResult, result);
     }
 
@@ -71,13 +72,15 @@ class GitHubControllerTest {
         UserRepositoriesResponse expectedRepositories = new UserRepositoriesResponse(username, repositories, HttpStatus.PARTIAL_CONTENT.value(), "Not all repositories downloaded");
         ResponseEntity<UserRepositoriesResponse> expectedResult =  ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(expectedRepositories);
 
-        when(request.getHeader("Accept")).thenReturn(acceptHeaderParam);
+        when(request.getHeader(HttpHeaders.ACCEPT)).thenReturn(acceptHeaderParam);
         when(service.getUserRepositories(username)).thenReturn(expectedRepositories);
 
         ResponseEntity<UserRepositoriesResponse> result = controller.getUserRepositories(username, request);
 
-        verify(request).getHeader("Accept");
+        verify(request).getHeader(HttpHeaders.ACCEPT);
+        verifyNoMoreInteractions(request);
         verify(service).getUserRepositories(username);
+        verifyNoMoreInteractions(service);
         assertEquals(expectedResult, result);
     }
 
@@ -88,14 +91,16 @@ class GitHubControllerTest {
         int expectedStatus = 404;
         String expectedMessage = "Not found";
 
-        when(request.getHeader("Accept")).thenReturn(acceptHeaderParam);
+        when(request.getHeader(HttpHeaders.ACCEPT)).thenReturn(acceptHeaderParam);
         when(service.getUserRepositories(username)).thenThrow(new UserNotFoundException(expectedMessage, expectedStatus));
 
         UserNotFoundException userNotFoundException = assertThrows(UserNotFoundException.class,
                 () -> controller.getUserRepositories(username, request));
 
-        verify(request).getHeader("Accept");
+        verify(request).getHeader(HttpHeaders.ACCEPT);
+        verifyNoMoreInteractions(request);
         verify(service).getUserRepositories(username);
+        verifyNoMoreInteractions(service);
         assertEquals(expectedMessage, userNotFoundException.getMessage());
         assertEquals(expectedStatus, userNotFoundException.getResponseCode());
     }
@@ -106,12 +111,13 @@ class GitHubControllerTest {
         String acceptHeaderParam = "application/xml";
         String expectedMessage = "Wrong accept header param: application/xml Only application/json is allowed";
 
-        when(request.getHeader("Accept")).thenReturn(acceptHeaderParam);
+        when(request.getHeader(HttpHeaders.ACCEPT)).thenReturn(acceptHeaderParam);
 
         WrongAcceptHeaderParamException wrongAcceptHeaderParamException = assertThrows(WrongAcceptHeaderParamException.class,
                 () -> controller.getUserRepositories(username, request));
 
-        verify(request).getHeader("Accept");
+        verify(request).getHeader(HttpHeaders.ACCEPT);
+        verifyNoMoreInteractions(request);
         assertEquals(expectedMessage, wrongAcceptHeaderParamException.getMessage());
     }
 

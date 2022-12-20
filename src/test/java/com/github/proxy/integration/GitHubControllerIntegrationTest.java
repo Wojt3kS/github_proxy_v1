@@ -76,7 +76,8 @@ public class GitHubControllerIntegrationTest {
                 .andExpect(jsonPath("$.repos[0].branches[0].name").value("master"))
                 .andExpect(jsonPath("$.repos[0].branches[0].lastCommitSha").value("a2eda2a1e6f7147c7b9019e7e2389105fd84e43d9"));
 
-
+        verify(exactly(1), getRequestedFor(urlEqualTo("/users/okydk/repos")));
+        verify(exactly(1), getRequestedFor(urlEqualTo("/repos/okydk/basegrid/branches")));
     }
 
     @Test
@@ -101,6 +102,8 @@ public class GitHubControllerIntegrationTest {
                 .andExpect(status().is(404))
                 .andExpect(jsonPath("$.message")
                         .value("Not Found"));
+
+        verify(exactly(1), getRequestedFor(urlEqualTo("/users/ThisUserDoesNotExist/repos")));
     }
 
 }
